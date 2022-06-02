@@ -1,0 +1,29 @@
+pragma solidity ^0.8.0;
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeMath.sol";
+
+//SPDX-License-Identifier: MIT
+
+contract Allowance is Ownable{
+
+   using SafeMath for uint ;
+    event allowanceChanged(address indexed _forWho , address indexed _fromWhom, uint _oldAmount, uint _newAmount);
+mapping(address =>uint) public allowance;
+    function knowBal() public view returns(uint) {
+        return address(this).balance;
+    }
+
+    function setAllowance(address  _to, uint _amount) public onlyOwner{
+        emit allowanceChanged(_to , msg.sender, allowance[_to], _amount);
+        allowance[_to] = _amount;
+    }
+
+    modifier ownerOrAllowed(uint _amount) {
+        require(owner() == msg.sender || allowance[msg.sender] >= _amount , "baahri desh ka hai" );
+        _;
+    }
+    function reduceAllowance(address _who, uint _amount) internal {
+        emit allowanceChanged(_who , msg.sender, allowance[_who], allowance[_who].sub(_amount));
+        allowance[_who] = allowance[_who].sub(_amount);
+    }
+}
